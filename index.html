@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- note this was vibe coded -->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chessboard Click Tracker with Correct Undo</title>
+<style>
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: sans-serif;
+    margin-top: 20px;
+  }
+  .chessboard {
+    display: grid;
+    grid-template-columns: repeat(8, 60px);
+    grid-template-rows: repeat(8, 60px);
+    border: 2px solid #333;
+  }
+  .square {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 18px;
+    text-align: center;
+    position: relative;
+  }
+  .white { background-color: #f0d9b5; }
+  .black { background-color: #b58863; }
+  .highlight { 
+    outline: 2px solid red;
+    outline-offset: -2px;
+  }
+  .dots {
+    font-size: 12px;
+    margin-top: 2px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    line-height: 1;
+  }
+  .dots span {
+    width: 10px;
+    text-align: center;
+    display: inline-block;
+  }
+  ul { margin-top: 20px; }
+  button {
+    margin-bottom: 10px;
+    padding: 5px 10px;
+    font-size: 16px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Chessboard Click Tracker</h1>
+<button id="undoBtn">Undo Last Click</button>
+<div class="chessboard" id="chessboard"></div>
+
+<h2>Clicked Squares:</h2>
+<ul id="clickedList"></ul>
+
+<script>
+const board = document.getElementById('chessboard');
+const clickedList = document.getElementById('clickedList');
+const undoBtn = document.getElementById('undoBtn');
+const files = ['a','b','c','d','e','f','g','h'];
+let globalClickCount = 0;
+
+// Stack to track clicks for undo
+const clickStack = [];
+
+// Format dots into rows of 5; replace 10 with a black square (■)
+function formatDots(count) {
+  let dots = '';
+  if (count < 10) {
+    for (let i = 0; i < count; i++) {
+      dots += '<span>●</span>';
+      if ((i + 1) % 5 === 0 && i !== count - 1) dots += '<br>';
+    }
+  } else {
+    const tens = Math.floor(count / 10);
+    const remainder = count % 10;
+    for (let t = 0; t < tens; t++) {
+      dots += '<span>■</span><br>';
+    }
+    for (let i = 0; i < remainder; i++) {
+      dots += '<span>●</span>';
+      if ((i + 1) % 5 === 0 && i !== remainder - 1) dots += '<br>';
+    }
+  }
+  return dots;
+}
+
+// Generate chessboard squares
+for (let row = 8; row >= 1; row--) {
+  for (let col = 0; col < 8; col++) {
+    const square = document.createElement('div');
+    square.classList.add('square');
+    if ((row + col) % 2 === 0) square.classList.add('white');
+    else square.classList.add('black');
+
+    square.dataset.rank = row;
+    square.dataset.file = files[col];
+    square.dataset.count = 0;
+
+    const numberDiv = document.createElement('div');
+    numberDiv.classList.add('number');
+    const dotsDiv = document.createElement('div');
+    dotsDiv.classList.add('dots');
+
+    square.appendChild(numberDiv);
+    square.appendChild(dotsDiv);
+
+    // Click handler
+    square.addEventListener('click', () => {
+      globalClickCount++;
+      square.dataset.count = Number(square.dataset.count) + 1;
+      square.classList.add('highlight');
+
+      numberDiv.textContent = globalClickCount;
+      dotsDiv.innerHTML = formatDots(square.dataset.count);
+
+      const notation = square.dataset.file + square.dataset.rank;
+      const li = document.createElement('li');
+      li.textContent = `${notation} clicked (${square.dataset.count}), global click: ${globalClickCount}`;
+      clickedList.appendChild(li);
+
+      clickStack.push({square, li});
+    });
+
+    board.appendChild(square);
+  }
+}
+
+// Undo button
+// Undo button
+undoBtn.addEventListener('click', () => {
+  if (clickStack.length === 0) return;
+
+  const lastClick = clickStack.pop();
+  const { square, li } = lastClick;
+
+  // Decrement global click count
+  globalClickCount = Math.max(globalClickCount - 1, 0);
+
+  // Decrement square-specific click count
+  square.dataset.count = Math.max(square.dataset.count - 1, 0);
+
+  // Remove the entry from the list
+  clickedList.removeChild(li);
+
+  // Update the square display
+  if (Number(square.dataset.count) === 0) {
+    // Fully reset the square: no number, no dots, no highlight
+    square.querySelector('.number').textContent = '';
+    square.querySelector('.dots').innerHTML = '';
+    square.classList.remove('highlight');
+  } else {
+    // Update dots for remaining clicks
+    square.querySelector('.dots').innerHTML = formatDots(square.dataset.count);
+
+    // Update number if needed (optional: can track last click for this square)
+    square.querySelector('.number').textContent = globalClickCount;
+  }
+});
+
+</script>
+
+</body>
+</html>
