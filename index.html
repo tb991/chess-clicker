@@ -61,7 +61,6 @@
 <body>
 
 <h1>Chessboard Click Tracker</h1>
-<button id="undoBtn">Undo Last Click</button>
 <div class="chessboard" id="chessboard"></div>
 
 <h2>Clicked Squares:</h2>
@@ -70,7 +69,6 @@
 <script>
 const board = document.getElementById('chessboard');
 const clickedList = document.getElementById('clickedList');
-const undoBtn = document.getElementById('undoBtn');
 const files = ['a','b','c','d','e','f','g','h'];
 let globalClickCount = 0;
 
