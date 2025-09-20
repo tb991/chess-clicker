@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- note this was vibe coded -->
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -60,7 +59,7 @@
 </style>
 </head>
 <body>
-<p> note: undos dont work, ai got confused</p>
+
 <h1>Chessboard Click Tracker</h1>
 <button id="undoBtn">Undo Last Click</button>
 <div class="chessboard" id="chessboard"></div>
@@ -141,37 +140,6 @@ for (let row = 8; row >= 1; row--) {
   }
 }
 
-// Undo button
-// Undo button
-undoBtn.addEventListener('click', () => {
-  if (clickStack.length === 0) return;
-
-  const lastClick = clickStack.pop();
-  const { square, li } = lastClick;
-
-  // Decrement global click count
-  globalClickCount = Math.max(globalClickCount - 1, 0);
-
-  // Decrement square-specific click count
-  square.dataset.count = Math.max(square.dataset.count - 1, 0);
-
-  // Remove the entry from the list
-  clickedList.removeChild(li);
-
-  // Update the square display
-  if (Number(square.dataset.count) === 0) {
-    // Fully reset the square: no number, no dots, no highlight
-    square.querySelector('.number').textContent = '';
-    square.querySelector('.dots').innerHTML = '';
-    square.classList.remove('highlight');
-  } else {
-    // Update dots for remaining clicks
-    square.querySelector('.dots').innerHTML = formatDots(square.dataset.count);
-
-    // Update number if needed (optional: can track last click for this square)
-    square.querySelector('.number').textContent = globalClickCount;
-  }
-});
 
 </script>
 
